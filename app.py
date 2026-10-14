@@ -30,5 +30,6 @@ def find_user(connection, username):
 
 if __name__ == "__main__":
     database = initialize_database()
+    username = input("Enter a username to search: ")
     print(find_user(database, "alice"))
     database.close()

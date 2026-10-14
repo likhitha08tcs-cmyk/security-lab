@@ -1,35 +1,35 @@
-
 import sqlite3
+from flask import Flask, request
+
+app = Flask(__name__)
+
+connection = sqlite3.connect(
+    ":memory:",
+    check_same_thread=False,
+)
+
+connection.execute(
+    "CREATE TABLE users (id INTEGER PRIMARY KEY, username TEXT)"
+)
+connection.execute(
+    "INSERT INTO users (username) VALUES (?)",
+    ("alice",),
+)
 
 
-def initialize_database():
-    """Create a small local database for the CodeQL test."""
-    connection = sqlite3.connect(":memory:")
-    connection.execute(
-        "CREATE TABLE users (id INTEGER PRIMARY KEY, username TEXT)"
-    )
-    connection.execute(
-        "INSERT INTO users (username) VALUES (?)",
-        ("alice",),
-    )
-    return connection
+@app.route("/user")
+def find_user():
+    username = request.args.get("username", "")
 
-
-def find_user(connection, username):
-    """
-    Intentionally vulnerable example for CodeQL testing.
-
-    Do not use this query construction in a real application.
-    """
+    # Intentionally vulnerable: security scanning test only.
     query = (
         "SELECT id, username FROM users "
         f"WHERE username = '{username}'"
     )
-    return connection.execute(query).fetchone()
+
+    result = connection.execute(query).fetchone()
+    return str(result)
 
 
 if __name__ == "__main__":
-    database = initialize_database()
-    username = input("Enter a username to search: ")
-    print(find_user(database, username))
-    database.close()
+    app.run(host="127.0.0.1", port=5000, debug=False)
